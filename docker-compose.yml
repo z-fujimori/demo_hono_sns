@@ -1,0 +1,32 @@
+version: "3.9"
+
+volumes:
+  hono_demo_postgres_data:
+
+services:
+  db:
+    image: postgres:15
+    container_name: hono_demo_postgres-db
+    volumes:
+      - hono_demo_postgres_data:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - '5432:5432'
+
+  backend:
+    build:
+      context: ./backend/
+      dockerfile: Dockerfile
+    container_name: hono_demo_backend_container
+    tty: true
+    volumes:
+      - ./backend:/app
+    ports:
+      - '8787:8787'
+    env_file:
+      - ../.env
+    depends_on:
+      - db
+    command: bun run dev
